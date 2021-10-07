@@ -2,4 +2,4 @@ dist/
 .scp/
 .env
 Makefile*.mta
-.*_mta_build_tmp
+git init.*_mta_build_tmp

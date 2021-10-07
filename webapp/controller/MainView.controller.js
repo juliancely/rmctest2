@@ -55,7 +55,7 @@ sap.ui.controller("releasemanagementcockpit.controller.MainView", {
 					mainViewController.showJobInfos();
 				}
 			})
-		});
+		}); 
 
 		showJobInfosDialog.setParent(this.oView);
 
