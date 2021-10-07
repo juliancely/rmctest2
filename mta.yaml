@@ -1,0 +1,94 @@
+_schema-version: "3.2"
+ID: ovee-tools-releasemanagementcockpit
+description: Release Management Cockpit App
+version: 0.0.1
+modules:
+- name: ovee-tools-releasemanagementcockpit-dest-content
+  type: com.sap.application.content
+  requires:
+  - name: ovee-tools-releasemanagementcockpit-dest-srv
+    parameters:
+      content-target: true
+  - name: ovee-tools-releasemanagementcockpit-repo-host
+    parameters:
+      service-key:
+        name: ovee-tools-releasemanagementcockpit-repo-host-key
+  - name: ovee-tools-releasemanagementcockpit-uaa
+    parameters:
+      service-key:
+        name: ovee-tools-releasemanagementcockpit-uaa-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: ovee-tools-releasemanagementcockpit_repo_host
+          ServiceInstanceName: ovee-tools-releasemanagementcockpit-html5-srv
+          ServiceKeyName: ovee-tools-releasemanagementcockpit-repo-host-key
+          sap.cloud.service: ovee-tools-releasemanagementcockpit
+        - Authentication: OAuth2UserTokenExchange
+          Name: ovee-tools-releasemanagementcockpit_uaa
+          ServiceInstanceName: ovee-tools-releasemanagementcockpit-xsuaa-srv
+          ServiceKeyName: ovee-tools-releasemanagementcockpit-uaa-key
+          sap.cloud.service: ovee-tools-releasemanagementcockpit
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: ovee-tools-releasemanagementcockpit-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: ovee-tools-releasemanagementcockpit-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - oveetoolsreleasemanagementcockpit.zip
+      name: oveetoolsreleasemanagementcockpit
+      target-path: resources/
+- name: oveetoolsreleasemanagementcockpit
+  type: html5
+  path: .
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: ovee-tools-releasemanagementcockpit-dest-srv
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: ovee-tools-releasemanagementcockpit-dest-srv
+    service-plan: lite
+- name: ovee-tools-releasemanagementcockpit-uaa
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: ovee-tools-releasemanagementcockpit-xsuaa-srv
+    service-plan: application
+- name: ovee-tools-releasemanagementcockpit-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: ovee-tools-releasemanagementcockpit-html5-srv
+    service-plan: app-host
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
